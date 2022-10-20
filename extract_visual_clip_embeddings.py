@@ -19,11 +19,11 @@ except ImportError:
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 USE_CACHE = False
-IMG_DIR = "./imgs/00000"
+IMG_DIR = "/data/prompt-search-imgs2/images"
 BATCH_SIZE = 128
-NUM_WORKERS = 14
+NUM_WORKERS = 42
 PERFETCH_FACTOR = 14
-OUTDIR = "./visual_embeddings"
+OUTDIR = "/data/prompt-search-imgs2/visual_embeddings"
 
 os.makedirs(OUTDIR, exist_ok=True)
 os.makedirs(OUTDIR + "/ids", exist_ok=True)
@@ -40,7 +40,7 @@ class CLIPImgDataset(Dataset):
         self,
         img_dir: str,
     ):
-        self.img_paths = glob.glob(f"{img_dir}/*.jpg", )
+        self.img_paths = glob.glob(f"{img_dir}/*.webp", )
 
         self.transform = Compose([
             Resize(224, interpolation=BICUBIC),
@@ -75,6 +75,8 @@ def main():
         device=DEVICE,
     )
     clip_img_dataset = CLIPImgDataset(img_dir=IMG_DIR, )
+    print("Len of dataset:")
+    print(len(clip_img_dataset))
     clip_img_dataloader = DataLoader(
         clip_img_dataset,
         batch_size=BATCH_SIZE,

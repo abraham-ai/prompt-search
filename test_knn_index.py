@@ -6,28 +6,37 @@ import clip
 import torch
 from clip_onnx import clip_onnx
 
-indices_folder = "knn_indices"
 
-prompt_index_filename = os.path.join(indices_folder, "prompts.index")
-embeddings_dir = "embeddings"
+database_root_dir = '/data/prompt-search-imgs2/'
+device = "cpu"
 
-prompt_ids = np.load(os.path.join(embeddings_dir, "prompt_ids.npy"))
+text = "This image is of an ornate fantasy cottage. A cottage with intricate stained-glass windows and doors with ivy crawling up the walls. A gingerbread style cottage straight out of a fairytale book complete with candy cane pillars and gumdrop roofs. Pentax 645"
+text = "a cute cat"
+
+
+INDICES_FOLDER = os.path.join(database_root_dir, "knn_indices")
+#INDEX_FILE_PATH = os.path.join(INDICES_FOLDER, "visual_prompts.index")
+prompt_index_filename = os.path.join(INDICES_FOLDER, "textual_prompts.index")
+#VISUAL_EMBEDDINGS_DIR = os.path.join(database_root_dir, "visual_embeddings")
+TEXTUAL_EMBEDDINGS_DIR = os.path.join(database_root_dir, "textual_embeddings")
+ONNX_DIR = os.path.join(database_root_dir, "clip_onnx_models")
+
+#visual_prompt_ids = np.load(os.path.join(VISUAL_EMBEDDINGS_DIR, "visual_ids.npy"))
+prompt_ids = np.load(os.path.join(TEXTUAL_EMBEDDINGS_DIR, "prompt_ids.npy"))
 
 loaded_index = faiss.read_index(
     prompt_index_filename,
     faiss.IO_FLAG_MMAP | faiss.IO_FLAG_READ_ONLY,
 )
 
-text = "cute cat"
-
-device = "cpu"
 model, preprocess = clip.load("ViT-B/32", device=device)
 onnx_model = clip_onnx(None)
 onnx_model.load_onnx(
-    visual_path="visual.onnx",
-    textual_path="textual.onnx",
+    visual_path= os.path.join(ONNX_DIR, "visual.onnx"),
+    textual_path= os.path.join(ONNX_DIR, "textual.onnx"),
     logit_scale=100.0000,
 )
+
 onnx_model.start_sessions(providers=["CPUExecutionProvider"], )
 
 tokenized_text = clip.tokenize(
@@ -38,7 +47,6 @@ tokenized_text = clip.tokenize(
 with torch.no_grad():
     text_embedding = model.encode_text(tokenized_text, )
     text_embedding /= text_embedding.norm(dim=-1, keepdim=True)
-
     text_embedding = text_embedding.cpu().numpy().astype('float32')
 
 tokenized_text = tokenized_text.detach().cpu().numpy().astype(np.int64)
