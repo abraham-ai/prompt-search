@@ -1,3 +1,4 @@
+import requests
 import os, time, shutil
 import faiss
 import numpy as np
@@ -164,7 +165,7 @@ def find_top_k_matches(input_data, mode, top_k, verbose=0, make_img_square=True)
         input_data     = CLIP_PREPROCESS(input_data).unsqueeze(0).to(DEVICE)
         embedding      = ONNX_MODEL.encode_image(input_data.numpy(), )
     elif in_type == 'txt':
-        input_data     = clip.tokenize([input_data], truncate=True,).to(DEVICE)
+        input_data     = clip.tokenize([input_data],).to(DEVICE)
         embedding      = ONNX_MODEL.encode_text(input_data.long().numpy(), )
 
     embedding /= np.linalg.norm(embedding, axis=-1, keepdims=True)
@@ -215,33 +216,7 @@ def save_imgs_to_dir(img_paths, scores, save_dir, subdir):
         score = scores[i]
         img.save(os.path.join(save_dir, subdir, f"{i:02}_{score:.3f}.jpg"))
 
-#####################################################################################################
 
 if __name__ == "__main__":
-    #from clip_search import *
-
-    input_img_path = "query_image.png"
-    input_img_path = "earthrise.jpg"
-    input_prompt   = "a glass museum, filled with thousands of neurons, mystical atmosphere"
-    top_k          = 5
-
-    input_img  = Image.open(input_img_path)
-    start_time = time.time()
-    img2img_matches, img2img_similarities = find_top_k_matches(input_img,    "img2img", top_k, verbose=1)
-    txt2img_matches, txt2img_similarities = find_top_k_matches(input_prompt, "txt2img", top_k, verbose=1)
-    txt2txt_matches, txt2txt_similarities = find_top_k_matches(input_prompt, "txt2txt", top_k, verbose=1)
-    img2txt_matches, img2txt_similarities = find_top_k_matches(input_img,    "img2txt", top_k, verbose=1)
-    img2img2txt_matches, img2img2txt_sims = find_top_k_matches(input_img,"img2img2txt", top_k, verbose=1)
-
-    print(f"\n ---> All 4 ONXX-DB searches completed in {time.time() - start_time:.3f} seconds",)
-
-    output_dir = "search-results"
-
-    try:
-        shutil.rmtree(output_dir)
-    except Exception as e:
-        pass
-    os.makedirs(output_dir, exist_ok = True)
-
-    save_imgs_to_dir(img2img_matches, img2img_similarities, output_dir, "img2img")
-    save_imgs_to_dir(txt2img_matches, txt2img_similarities, output_dir, "txt2img")
+    url = "https://thumbs.dreamstime.com/z/myrtle-beach-south-carolina-june-giant-king-kong-empire-state-building-hollywood-wax-museum-entertainment-center-172295347.jpg"
+    search_image(url, "img2img2txt", 10)
