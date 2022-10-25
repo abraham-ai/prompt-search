@@ -1,5 +1,6 @@
 import argparse
 import datetime
+import requests
 import os
 import random
 import numpy as np
@@ -25,16 +26,13 @@ args = parser.parse_args()
 my_args = {
     "top_k": 5,
     "mode": "img2img2txt",
-    "image": EdenImage(),
+    #"image": EdenImage(),
     "image_url": ""
 }
 
 @eden_block.run(args=my_args)
 def run(config):
-    if config["image"]:
-        input_img = config["image"]
-    elif config["image_url"]:
-        input_img = Image.open(requests.get(config["image_url"], stream=True).raw)
+    input_img = Image.open(requests.get(config["image_url"], stream=True).raw)
     matches, similarities = find_top_k_matches(input_img, config["mode"], config["top_k"])
     similarities = [float(s) for s in similarities]
     results = {"matches": matches, "similarity": similarities}

@@ -1,7 +1,6 @@
 imgs
 knn_indices
 visual_embeddings
-
+.env
 *.onnx
-
 img_links.txt

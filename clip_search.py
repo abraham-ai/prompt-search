@@ -7,8 +7,11 @@ import clip
 import torch
 from PIL import Image
 from clip_onnx import clip_onnx
-        
-DATABASE_ROOT_DIR   = '/data/prompt-search-imgs2/'
+
+from dotenv import load_dotenv
+load_dotenv()        
+
+DATABASE_ROOT_DIR = os.getenv("DATABASE_ROOT_DIR")
 
 IMG_FILES_EXTENSION = ".webp"
 TXT_FILES_EXTENSION = ".txt"
