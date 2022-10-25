@@ -26,13 +26,16 @@ args = parser.parse_args()
 my_args = {
     "top_k": 5,
     "mode": "img2img2txt",
-    #"image": EdenImage(),
+    "image": EdenImage(),
     "image_url": ""
 }
 
 @eden_block.run(args=my_args)
 def run(config):
-    input_img = Image.open(requests.get(config["image_url"], stream=True).raw)
+    if config["image_url"]:
+        input_img = Image.open(requests.get(config["image_url"], stream=True).raw)
+    elif config["image"]:
+        input_img = config["image"]
     matches, similarities = find_top_k_matches(input_img, config["mode"], config["top_k"])
     similarities = [float(s) for s in similarities]
     results = {"matches": matches, "similarity": similarities}
