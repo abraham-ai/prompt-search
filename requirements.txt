@@ -1,3 +1,4 @@
+requests
 python-dotenv
 autofaiss==2.15.3
 clip-by-openai==1.1
